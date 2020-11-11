@@ -4,12 +4,11 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import pickle
 import time
+
 options = webdriver.ChromeOptions()
 options.add_argument('--headless') # so that the web browser doesn't open
 driver_path = "C:\\Drivers\\chromedriver.exe"
 driver = webdriver.Chrome(executable_path = driver_path, chrome_options = options)
-driver.get("https://www.amazon.com/Powerbeats-Pro-Totally-Wireless-Earphones/dp/B07R5QD598/ref=sr_1_1_sspa?dchild=1&keywords=powerbeats+pro&qid=1605052572&sr=8-1-spons&psc=1&spLa=ZW5jcnlwdGVkUXVhbGlmaWVyPUExSTRFRURGR1hDVUNXJmVuY3J5cHRlZElkPUEwOTc1MTM4M01FN0lEUTBaWU40VSZlbmNyeXB0ZWRBZElkPUEwNDIwODgzVDhaREE0Tlo2VlZEJndpZGdldE5hbWU9c3BfYXRmJmFjdGlvbj1jbGlja1JlZGlyZWN0JmRvTm90TG9nQ2xpY2s9dHJ1ZQ==")
-time.sleep(5) # give the page time to load
 prices = {} # key is the link, value is a tuple that looks like (xPath, price)
 
 try:
@@ -18,20 +17,40 @@ try:
 except:
     pass
 
+# checks the current price, if it is different from the previous price, return True else False
+def check(link, current_price):
+    previous_price = prices[link][1]
+    if previous_price != current_price:
+        return True
+    return False
+
+# adds a link to the ditionary as a key with the xPath and price as its value
 def add(link, xPath):
     driver.get(link)
-    price = driver.find_element_by_xpath(xPath).text
-    prices[link] = (xPath, price)
+    try:
+        element = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, xPath))
+        )
+        price = driver.find_element_by_xpath(xPath).text
+        prices[link] = (xPath, price)
+    finally:
+        driver.quit()
 
 if __name__ == "__main__":
     change = False
     # go through the items to see if any prices changed
-    '''for key in prices:
+    for key in prices:
         driver.get(key)
-        price = driver.find_element_by_xpath(prices[key][0])
-        previousPrice = prices[key][1]
-        if price != previousPrice:
-            change = True
+        time.sleep(5) # give the page time to load
+        try:
+            element = WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.XPATH, prices[key][0]))
+            )
+            price = driver.find_element_by_xpath(prices[key][0]).text
+            if check(key, price):
+                change = True
+        finally:
+            driver.quit()
     if change:
         print("Prices have changed for: ")
     else:
@@ -51,15 +70,7 @@ if __name__ == "__main__":
         elif r == '3':
             break
         else:
-            print("That is not a valid response.")'''
-    try:
-        element = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, '//*[@id="priceblock_ourprice"]'))
-        )
-        print("found")
-        price = driver.find_element_by_xpath('//*[@id="priceblock_ourprice"]').text
-        print(price)
-    finally:
-        driver.quit()
+            print("That is not a valid response.")
+    
     
     
