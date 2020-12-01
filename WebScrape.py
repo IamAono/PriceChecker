@@ -9,7 +9,7 @@ options = webdriver.ChromeOptions()
 options.add_argument('--headless') # so that the web browser doesn't open
 driver_path = "C:\\Drivers\\chromedriver.exe"
 driver = webdriver.Chrome(executable_path = driver_path, chrome_options = options)
-prices = {} # key is the link, value is a list that has the xPath, price, and item name
+prices = {} # key is the name, value is a list that has the link, xPath, and price
 
 try:
     prices = pickle.load(open("C:\\Github\\PriceChecker\\save.p","rb"))
@@ -17,7 +17,7 @@ try:
 except:
     pass
 
-
+# will return the list of items whose price has changed
 def price_change():
     changes = [] # holds the names of all items that have changed prices
     for key in prices:
@@ -32,9 +32,7 @@ def price_change():
                 prices[key][2] = price # now we update the price
         finally:
             driver.quit()
-    if len(changes) != 0:
-        return True
-    return False
+    return changes
 
 # checks the current price, if it is different from the previous price, return True else False
 def check(link, current_price):
@@ -57,8 +55,10 @@ def add(name, link, xPath):
 
 if __name__ == "__main__":
     change = price_change() # go through the items to see if any prices changed
-    if change:
+    if len(change) > 0:
         print("Prices have changed for: ")
+        for c in change:
+            print(c)
     else:
         print("No change in prices")
     while True:
