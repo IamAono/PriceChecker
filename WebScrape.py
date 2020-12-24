@@ -31,7 +31,7 @@ def price_change():
                 changes.append(key)
                 prices[key][2] = price # now we update the price
         finally:
-            driver.quit()
+            pass
     return changes
 
 # checks the current price, if it is different from the previous price, return True else False
@@ -51,7 +51,7 @@ def add(name, link, xPath):
         price = driver.find_element_by_xpath(xPath).text
         prices[name] = [link, xPath, price]
     finally:
-        driver.quit()
+        pass
 
 if __name__ == "__main__":
     change = price_change() # go through the items to see if any prices changed
@@ -88,6 +88,7 @@ if __name__ == "__main__":
                 print("Name:", key, "price:", prices[key][2])
         elif r == '4':
             pickle.dump(prices, open("C:\\Github\\PriceChecker\\save.p", "wb"))
+            driver.quit()
             break
         else:
             print("That is not a valid response.")
