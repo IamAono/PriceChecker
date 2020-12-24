@@ -62,7 +62,7 @@ if __name__ == "__main__":
     else:
         print("No change in prices")
     while True:
-        print("1. add item\n2. remove item\n3. exit")
+        print("1. add item\n2. remove item\n3. view items\n4. exit")
         r = input()
         if r == '1':
             print("Name: ")
@@ -84,6 +84,9 @@ if __name__ == "__main__":
             else:
                 print("That is not a name in the dictionary")
         elif r == '3':
+            for key in prices:
+                print("Name:", key, "price:", prices[key][2])
+        elif r == '4':
             pickle.dump(prices, open("C:\\Github\\PriceChecker\\save.p", "wb"))
             break
         else:
