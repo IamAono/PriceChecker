@@ -19,7 +19,8 @@ except:
 
 # will return the list of items whose price has changed
 def price_change():
-    changes = [] # holds the names of all items that have changed prices
+    # holds the names, previous price, and current price of all items that have changed prices
+    changes = [] 
     for key in prices:
         driver.get(prices[key][0])
         try:
@@ -28,7 +29,7 @@ def price_change():
             )
             price = driver.find_element_by_xpath(prices[key][1]).text
             if check(key, price):
-                changes.append(key)
+                changes.append([key, prices[key][2], price])
                 prices[key][2] = price # now we update the price
         finally:
             pass
@@ -58,7 +59,7 @@ if __name__ == "__main__":
     if len(change) > 0:
         print("Prices have changed for: ")
         for c in change:
-            print(c)
+            print(c[0], "went from", c[1], "to", c[2])
     else:
         print("No change in prices")
     while True:
