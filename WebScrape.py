@@ -2,47 +2,40 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import Item
+from Item import Item
 import pickle
 import time
 
 options = webdriver.ChromeOptions()
 options.add_argument('--headless') # so that the web browser doesn't open
+options.add_argument("--log-level=3") # to ignore deprecation error 
 driver_path = "C:\\Drivers\\chromedriver.exe"
 driver = webdriver.Chrome(executable_path = driver_path, chrome_options = options)
-#prices = {} # key is the name, value is a list that has the link, xPath, and price
+prices = {} # key is the name, value is a list that has the link, xPath, and price
 items = [] # list of items
 
 try:
-    prices = pickle.load(open("C:\\Github\\PriceChecker\\save.p","rb"))
+    items = pickle.load(open("C:\\Github\\PriceChecker\\save.p","rb"))
     print("exists")
 except:
     pass
 
 # will return the list of items whose price has changed
 def price_change():
-    # holds the names, previous price, and current price of all items that have changed prices
-    changes = [] 
-    for key in prices:
-        driver.get(prices[key][0])
+    changes = []
+    for item in items:
+        driver.get(item.link)
         try:
             element = WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.XPATH, prices[key][1]))
+                EC.presence_of_element_located((By.XPATH, item.xPath))
             )
-            price = driver.find_element_by_xpath(prices[key][1]).text
-            if check(key, price):
-                changes.append([key, prices[key][2], price])
-                prices[key][2] = price # now we update the price
+            price = driver.find_element_by_xpath(item.xPath).text
+            if item.price != price:
+                changes.append([item.name, item.price, price])
+                item.price = price # now we update the price
         finally:
             pass
     return changes
-
-# checks the current price, if it is different from the previous price, return True else False
-def check(link, current_price):
-    previous_price = prices[link][2]
-    if previous_price != current_price:
-        return True
-    return False
 
 # adds a link to the ditionary as a key with the xPath and price as its value
 def add(name, link, xPath):
@@ -52,20 +45,13 @@ def add(name, link, xPath):
             EC.presence_of_element_located((By.XPATH, xPath))
         )
         price = driver.find_element_by_xpath(xPath).text
-        prices[name] = [link, xPath, price]
+        items.append(Item(name, link, xPath, price))
     finally:
         pass
 
 if __name__ == "__main__":
-    change = price_change() # go through the items to see if any prices changed
-    if len(change) > 0:
-        print("Prices have changed for: ")
-        for c in change:
-            print(c[0], "went from", c[1], "to", c[2])
-    else:
-        print("No change in prices")
     while True:
-        print("1. add item\n2. remove item\n3. view items\n4. exit")
+        print("1. add item\n2. remove item\n3. view items\n4. price history\n5. exit")
         r = input()
         if r == '1':
             print("Name: ")
@@ -77,20 +63,24 @@ if __name__ == "__main__":
             add(name, link, xPath)
         elif r == '2':
             print("These are the items currently saved")
-            for key in prices:
-                print(key)
-            print("Enter in the name of the item you want to remove")
-            remove = input()
-            if prices.__contains__(remove):
-                prices.pop(remove)
+            for i in range(0, len(items)):
+                print(i, items[i].name)
+            print("Enter in the number of the item you want to remove")
+            remove = int(input())
+            if remove >= 0 and remove < len(items):
+                del items[remove]
                 print("Successfully removed")
             else:
-                print("That is not a name in the dictionary")
+                print("That is not a valid number")
         elif r == '3':
-            for key in prices:
-                print("Name:", key, "price:", prices[key][2])
+            for item in items:
+                print("Name:", item.name, "price:", item.price)
         elif r == '4':
-            pickle.dump(prices, open("C:\\Github\\PriceChecker\\save.p", "wb"))
+            print("These are the items currently saved")
+            for item in items:
+                print("Name:", item.name)
+        elif r == '5':
+            pickle.dump(items, open("C:\\Github\\PriceChecker\\save.p", "wb"))
             driver.quit()
             break
         else:
