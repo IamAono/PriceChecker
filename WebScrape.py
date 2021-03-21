@@ -2,6 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import Item
 import pickle
 import time
 
@@ -9,7 +10,8 @@ options = webdriver.ChromeOptions()
 options.add_argument('--headless') # so that the web browser doesn't open
 driver_path = "C:\\Drivers\\chromedriver.exe"
 driver = webdriver.Chrome(executable_path = driver_path, chrome_options = options)
-prices = {} # key is the name, value is a list that has the link, xPath, and price
+#prices = {} # key is the name, value is a list that has the link, xPath, and price
+items = [] # list of items
 
 try:
     prices = pickle.load(open("C:\\Github\\PriceChecker\\save.p","rb"))
