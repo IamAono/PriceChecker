@@ -11,7 +11,6 @@ options.add_argument('--headless') # so that the web browser doesn't open
 options.add_argument("--log-level=3") # to ignore deprecation error 
 driver_path = "C:\\Drivers\\chromedriver.exe"
 driver = webdriver.Chrome(executable_path = driver_path, chrome_options = options)
-prices = {} # key is the name, value is a list that has the link, xPath, and price
 items = [] # list of items
 
 try:
@@ -32,7 +31,7 @@ def price_change():
             price = driver.find_element_by_xpath(item.xPath).text
             if item.price != price:
                 changes.append([item.name, item.price, price])
-                item.price = price # now we update the price
+                item.newPrice(price) # now we update the price
         finally:
             pass
     return changes
@@ -50,6 +49,12 @@ def add(name, link, xPath):
         pass
 
 if __name__ == "__main__":
+    changes = price_change()
+    if(len(changes) == 0):
+        print("No change in prices")
+    else:
+        for c in changes:
+            print(c[0], "went from", c[1], "to", c[2])
     while True:
         print("1. add item\n2. remove item\n3. view items\n4. price history\n5. exit")
         r = input()
@@ -76,9 +81,9 @@ if __name__ == "__main__":
             for item in items:
                 print("Name:", item.name, "price:", item.price)
         elif r == '4':
-            print("These are the items currently saved")
             for item in items:
-                print("Name:", item.name)
+                print("Price history for", item.name)
+                item.viewPriceHist()
         elif r == '5':
             pickle.dump(items, open("C:\\Github\\PriceChecker\\save.p", "wb"))
             driver.quit()

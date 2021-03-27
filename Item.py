@@ -18,7 +18,3 @@ class Item:
         for key in self.priceHistory:
             print("On", key, "the price was", self.priceHistory[key])
 
-if __name__ == "__main__":
-    a = Item("link", "xPath", 10)
-    a.viewPriceHist()
-
